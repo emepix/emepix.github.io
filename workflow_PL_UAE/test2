@@ -1,0 +1,14 @@
+from pathlib import Path
+
+src_dir = Path(r"D:\0600 QINSy Survey Data\MB Data")
+pattern = "UTD*.pts"
+
+files = list(src_dir.glob(pattern))
+
+if not files:
+    print("❌ Aucun fichier trouvé.")
+else:
+    print("✅ Fichiers trouvés :")
+    for f in files:
+        print(" -", f)
+        

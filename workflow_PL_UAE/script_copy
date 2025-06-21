@@ -1,0 +1,51 @@
+import shutil
+import time
+from pathlib import Path
+
+# Configuration 1 _________________________________________________________________________
+src_dir = Path(r"D:\0600 QINSy Survey Data\MB Data")
+dst_root = Path(r"D:\test")
+polling_interval = 5
+pattern = "UTD*.pts"
+
+def find_best_matching_folder(file_name: str, candidate_dirs):
+    for folder in candidate_dirs:
+        folder_name = folder.name.lower()
+        # Vérifie si au moins 3 lettres de suite du dossier sont dans le nom de fichier
+        if folder_name in file_name.lower() and len(folder_name) >= 3:
+            return folder
+    return None
+
+
+try:
+    while True:
+        # Liste des sous-dossiers dans le dossier destination
+        subfolders = [f for f in dst_root.iterdir() if f.is_dir()]
+
+        for src_file in src_dir.glob(pattern):
+            file_name = src_file.name
+
+            # Évite de recopier un fichier déjà déplacé
+            found = any((f / file_name).exists() for f in subfolders)
+            if found:
+                continue
+
+            # Cherche le dossier correspondant
+            matching_folder = find_best_matching_folder(file_name, subfolders)
+
+            if matching_folder:
+                dst_path = matching_folder / file_name
+                print(f"[COPIE] {file_name} → {dst_path}")
+                try:
+                    shutil.copy2(src_file, dst_path)
+                except Exception as e:
+                    print(f"[ERREUR] {e}")
+            else:
+                print(f"[SKIP] Aucun dossier ne correspond à {file_name}")
+
+        time.sleep(polling_interval)
+
+except KeyboardInterrupt:
+    print("🛑 Arrêté par l'utilisateur.")
+
+
